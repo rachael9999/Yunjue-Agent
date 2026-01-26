@@ -38,7 +38,7 @@ We welcome connections of all kinds. For financing inquiries, technical exchange
 
 ### ⚡ Quick Setup
 
-**Example**: Start evolving from DEEPSEARCHQA.
+**Example**: Start evolving from DeepSearchQA.
 
 ```bash
 # 1. Clone and setup
@@ -58,7 +58,7 @@ source .venv/bin/activate
 
 ```
 
-🎉 **Expected Output:** Your agent will start completing questions from DEEPSEARCHQA. You can view the corresponding logs in `output/test` 😊
+🎉 **Expected Output:** Your agent will start completing questions from DeepSearchQA. You can view the corresponding logs in `output/test` 😊
 
 ---
 
