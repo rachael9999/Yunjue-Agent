@@ -89,7 +89,7 @@ Conventional agent systems often struggle in open-ended environments where task 
 
 - **🧬 In-situ Self-evolving Paradigm**
     
-    We introduce a novel framework that bridges the gap between offline training and online deployment. By reframing discrete interactions as a continuous stream of experience, the system distills short-term inference into long-term capabilities via internal feedback loops. This enables real-time adaptation and exploration in open-ended environments without the need for additional model training.
+    We introduce a novel agentic learning framework that bridges the gap between static capability and on-the-fly evolving. By reframing discrete interactions as a continuous stream of experience, the system distills short-term inference into long-term capabilities via internal feedback loops. This enables real-time adaptation and exploration in open-ended environments without the need for additional supervision signals.
     
 - **🚀 SOTA Performance from "Tabula Rasa"**
     
@@ -101,7 +101,7 @@ Conventional agent systems often struggle in open-ended environments where task 
     
 - **🔍 Fully Reproducible & Open Traces**
     
-    We release a comprehensive open-asset suite, including end-to-end code, benchmark scripts, versioned tool artifacts, and full interaction traces. This transforms "black-box" agent results into transparent, auditable research, enabling granular analysis of tool convergence, evolution efficiency, and merge strategies.
+    We release a comprehensive open-asset suite, including end-to-end code, benchmark scripts, versioned tool artifacts, and full interaction traces. This transforms "black-box" agent results into transparent, auditable research, enabling granular analysis of tool convergence, evolution efficiency, and merging strategies.
 
 ## 📈 Performance on Benchmarks
 
