@@ -1,0 +1,48 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.coverage
+.coverage.*
+agent_history.gif
+static/browser_history/*.gif
+
+.vscode/
+
+# Virtual environments
+.venv
+venv/
+
+# Environment variables
+.env
+
+# user conf
+conf.yaml
+
+.idea/
+.langgraph_api/
+.DS_Store
+
+# coverage report
+coverage.xml
+coverage/
+
+checkpoints/
+dynamic_tools/
+private_dynamic_tools*/
+dynamic_tools_public*/
+tool_test/
+fail_tool/
+workspace/
+dataset/GAIA/files_*
+
+*.ipynb
+
+output/
+legacy/
+
+*.log
+*.db*

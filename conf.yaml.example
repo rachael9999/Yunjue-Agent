@@ -1,0 +1,57 @@
+BASIC_MODEL:
+  base_url: https://xxx
+  model: "gpt-5"
+  api_key: xxxx
+  temperature: 0.7
+  token_limit: 200000
+  # max_retries: 3
+  # max_retries: 3 # Maximum number of retries for LLM calls
+
+
+EVAL_MODEL:
+  base_url: https://xxx
+  model: "gpt-5"
+  api_key: xxxx
+  temperature: 0
+  token_limit: 200000
+  # max_retries: 3
+  # max_retries: 3 # Maximum number of retries for LLM calls
+
+
+
+VISION_MODEL:
+  base_url: xxx
+  model: xxx
+  api_key: xxx
+  temperature: 0.7
+  token_limit: xxx
+  # max_retries: 3
+  # timeout: 180
+
+SUMMARIZE_MODEL:
+  base_url: https://xxx
+  model: "gpt-5"
+  api_key: xxxx
+  temperature: 0.2
+  token_limit: 200000
+  # max_retries: 3 # Maximum number of retries for summary LLM calls
+  # timeout: 180
+
+
+CLUSTER_MODEL:
+  base_url: https://xxx
+  model: "gpt-5"
+  api_key: xxxx
+  temperature: 0.2
+  token_limit: 200000
+  # max_retries: 3 # Maximum number of retries for summary LLM calls
+  # timeout: 180
+
+TOOL_ANALYZE_MODEL:
+  base_url: https://xxx
+  model: "gpt-5"
+  api_key: xxxx
+  temperature: 0.2
+  token_limit: 200000
+  # max_retries: 3 # Maximum number of retries for summary LLM calls
+  # timeout: 180
