@@ -75,7 +75,7 @@ Conventional agent systems often struggle in open-ended environments where task 
     <td style="text-align: center; padding: 10px;">
       <strong>Demo</strong> 
       <br>
-      <video src="docs/assets/demo.mp4"
+      <video src="https://github.com/user-attachments/assets/6bcc6aa2-f982-4685-8b2a-846e4a03bf3e"
              controls muted preload="metadata"
              width="50%" height="50%"
       </video>
