@@ -112,6 +112,24 @@ We benchmark Yunjue Agent on a series of benchmarks, including **HLE**, **DeepSe
 
 ---
 
+## 📚 Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@misc{li2026yunjueagenttechreport,
+      title={Yunjue Agent Tech Report: A Fully Reproducible, Zero-Start In-Situ Self-Evolving Agent System for Open-Ended Tasks}, 
+      author={Haotian Li and Shijun Yang and Weizhen Qi and Silei Zhao and Rui Hua and Mingzhu Song and Xiaojian Yang and Chao Peng},
+      year={2026},
+      eprint={2601.18226},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2601.18226}, 
+}
+```
+
+---
+
 
 ## 📄 License
 
