@@ -74,9 +74,9 @@ class ReActAgent:
         self.max_steps = max_steps
         self.max_retries = max_retries
 
-        self.tools = tools
+        self.tools = tools or []
         self._llm_base = llm
-        self._llm_with_tools = llm.bind_tools(self.tools)
+        self._llm_with_tools = self._bind_tools(self.tools)
         self.tool_node = ToolNode(self.tools)
         self.tool_enhance_interval = tool_enhance_interval
         self.dynamic_tools_dir = dynamic_tools_dir
@@ -101,6 +101,10 @@ class ReActAgent:
         workflow.add_edge("rollback", "agent")
 
         self.graph = workflow.compile()
+
+    def _bind_tools(self, tools: List):
+        # DashScope rejects empty tool lists; avoid binding when there are no tools.
+        return self._llm_base.bind_tools(tools) if tools else self._llm_base
 
     def need_enhance(self, state):
         tool_steps = state.get("tool_steps", 0)
@@ -186,7 +190,7 @@ class ReActAgent:
         bound_tools = enhanced_success_tools + [
             tool for tool in self.tools if tool.name not in enhanced_tools_name
         ]
-        self._llm_with_tools = self._llm_with_tools.bind_tools(bound_tools)
+        self._llm_with_tools = self._bind_tools(bound_tools)
 
         return {"messages": messages, "tool_steps": tool_steps, "retry_count": retry_count}
 
