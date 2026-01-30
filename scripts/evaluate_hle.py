@@ -5,18 +5,16 @@ import math
 import argparse
 import asyncio
 import numpy as np
+from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel
 from openai import AsyncOpenAI
 from tqdm.asyncio import tqdm_asyncio
 from datasets import load_dataset
 
-client = AsyncOpenAI(
-    base_url='xxx',
-    api_key='xxxx',
-    timeout=300.0, 
-    max_retries=3
-)
+import yaml
+
+client: AsyncOpenAI | None = None
 
 JUDGE_PROMPT = """Judge whether the following [response] to [question] is correct or not based on the precise and unambiguous [correct_answer] below.
 
@@ -48,6 +46,9 @@ class ExtractedAnswer(BaseModel):
 async def extract_answer(question, correct_answer, response):
     prompt = JUDGE_PROMPT.format(question=question, correct_answer=correct_answer, response=response)
     try:
+        if client is None:
+            raise RuntimeError("AsyncOpenAI client is not initialised")
+
         response = await client.beta.chat.completions.parse(
                 model=args.judge,
                 max_completion_tokens=4096, # overkill for judge
@@ -222,7 +223,44 @@ def load_predictions(filepath):
     return predictions
 
 def main(args):
+    global client
     assert args.num_workers > 1, "num_workers must be 2 or greater"
+
+    # Load judge client config from conf.yaml (EVAL_MODEL) to support Qwen/DashScope.
+    config_path = Path(args.config)
+    conf = yaml.safe_load(config_path.read_text(encoding="utf-8")) if config_path.exists() else {}
+    eval_conf = conf.get("EVAL_MODEL", {}) if isinstance(conf, dict) else {}
+    if not isinstance(eval_conf, dict):
+        eval_conf = {}
+
+    provider = str(eval_conf.get("provider", "")).strip().lower()
+    base_url = (
+        os.environ.get("EVAL_BASE_URL")
+        or eval_conf.get("base_url")
+        or (
+            "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            if provider in {"qwen", "tongyi", "dashscope"}
+            else None
+        )
+    )
+    api_key = (
+        os.environ.get("EVAL_API_KEY")
+        or eval_conf.get("api_key")
+        or os.environ.get("DASHSCOPE_API_KEY")
+        or os.environ.get("OPENAI_API_KEY")
+    )
+    timeout = float(eval_conf.get("timeout", 300.0))
+    max_retries = int(eval_conf.get("max_retries", 3))
+
+    if not api_key:
+        raise ValueError(
+            "Missing eval api_key. Set EVAL_MODEL.api_key in conf.yaml, or export DASHSCOPE_API_KEY/OPENAI_API_KEY."
+        )
+
+    client_kwargs = {"api_key": api_key, "timeout": timeout, "max_retries": max_retries}
+    if base_url:
+        client_kwargs["base_url"] = base_url
+    client = AsyncOpenAI(**client_kwargs)
 
     # Use same extension as input file for output
     input_basename = os.path.basename(args.predictions)
@@ -289,5 +327,11 @@ if __name__ == "__main__":
     parser.add_argument("--predictions", type=str, help="Model Predictions")
     parser.add_argument("--num_workers", type=int, default=100, help="Async semaphore size. This depends on your rate limit.")
     parser.add_argument("--judge", type=str, default="o3-mini-2025-01-31", help="Judge model") # prev: "gpt-4o-2024-08-06"
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="conf.yaml",
+        help="Path to conf.yaml containing EVAL_MODEL settings",
+    )
     args = parser.parse_args()
     main(args)

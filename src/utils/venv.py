@@ -1,6 +1,7 @@
 # Copyright (c) 2026 Yunjue Tech
 # SPDX-License-Identifier: Apache-2.0
 import logging
+import os
 import subprocess
 from pathlib import Path
 
@@ -9,8 +10,15 @@ logger = logging.getLogger(__name__)
 # Path to isolated virtual environment for dynamic tools
 ISOLATED_VENV_PATH = Path(".dynamic_tools_venv")
 
+def _isolated_python_path() -> Path:
+    # Windows venvs use Scripts/python.exe; POSIX uses bin/python
+    if os.name == "nt":
+        return ISOLATED_VENV_PATH / "Scripts" / "python.exe"
+    return ISOLATED_VENV_PATH / "bin" / "python"
+
+
 # Python binary file in the isolated virtual environment
-ISOLATED_PYTHON_PATH = ISOLATED_VENV_PATH / "bin" / "python"
+ISOLATED_PYTHON_PATH = _isolated_python_path()
 
 
 def ensure_isolated_venv_exists() -> None:

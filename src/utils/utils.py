@@ -6,10 +6,14 @@ import logging
 import os
 import re
 import subprocess
-from typing import Any, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
+import httpx
+from openai import AsyncOpenAI
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 
+from src.config.config import load_yaml_config
 from src.schema.types import ToolExecutionRecord, ToolRequest, StepToolAnalysis, ResponseAnalysis, LLMType
 from src.services.llms.llm import create_llm, get_max_tokens
 from src.prompts.loader import prompt_loader
@@ -27,6 +31,121 @@ CODEX_EXEC_TIMEOUT_SECONDS = 20 * 60
 # Max retries when parsing LLM analysis outputs
 ANALYSIS_MAX_RETRIES = 3
 
+CODEX_SYSTEM_PROMPT = (
+    "You are a coding assistant. Generate the tool as a single Python code block. "
+    "Only output one ```python``` block and nothing else."
+)
+
+
+def _load_codex_config() -> Dict[str, Any]:
+    config_path = (Path(__file__).parent.parent.parent / "conf.yaml").resolve()
+    conf = load_yaml_config(str(config_path))
+    if not isinstance(conf, dict):
+        return {}
+    codex_conf = conf.get("CODEX_MODEL", {})
+    return codex_conf if isinstance(codex_conf, dict) else {}
+
+
+async def _call_codex_via_api(prompt: str, output_file: str | None, codex_conf: Dict[str, Any]) -> tuple[str, bool]:
+    api_key = (
+        os.environ.get("CODEX_API_KEY")
+        or codex_conf.get("api_key")
+        or os.environ.get("OPENAI_API_KEY")
+    )
+    model = codex_conf.get("model")
+    base_url = codex_conf.get("base_url") or os.environ.get("OPENAI_BASE_URL")
+    timeout = float(codex_conf.get("timeout", 180))
+    max_retries = int(codex_conf.get("max_retries", 3))
+    temperature = codex_conf.get("temperature", 0.2)
+
+    if not api_key:
+        logger.error("CODEX_MODEL.api_key or CODEX_API_KEY/OPENAI_API_KEY is required")
+        return "", False
+    if not model:
+        logger.error("CODEX_MODEL.model is required")
+        return "", False
+
+    http_client = None
+    if codex_conf.get("verify_ssl", True) is False:
+        http_client = httpx.AsyncClient(verify=False)
+
+    client_kwargs: Dict[str, Any] = {
+        "api_key": api_key,
+        "timeout": timeout,
+        "max_retries": max_retries,
+    }
+    if base_url:
+        client_kwargs["base_url"] = base_url
+    if http_client:
+        client_kwargs["http_client"] = http_client
+
+    client = AsyncOpenAI(**client_kwargs)
+    try:
+        logger.info("Calling CODEX_MODEL via OpenAI API with prompt length: %s", len(prompt))
+        response = await client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": CODEX_SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=temperature,
+        )
+        if not response.choices:
+            logger.error("CODEX_MODEL response contained no choices")
+            return "", False
+        generated_code = response.choices[0].message.content or ""
+        generated_code = generated_code.strip()
+    except Exception as e:
+        logger.error("CODEX_MODEL call failed: %s", e)
+        return "", False
+    finally:
+        if http_client:
+            await http_client.aclose()
+
+    if not generated_code:
+        logger.warning("CODEX_MODEL returned empty output")
+        return "", False
+
+    # If output_file is specified, save the code to file
+    if output_file:
+        try:
+            code_blocks = re.findall(r"```python\s*(.*?)\s*```", generated_code, re.DOTALL)
+            if not code_blocks:
+                logger.warning("No python code block found in CODEX_MODEL output")
+                return "", False
+
+            generated_code = code_blocks[-1].strip()
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(generated_code)
+            logger.info("Generated code saved to: %s", output_file)
+            extraction_success, tool_info, extraction_error = extract_tool_info(output_file)
+            if not extraction_success:
+                logger.error("Failed to extract tool info for %s: %s", output_file, extraction_error)
+                os.remove(output_file)
+                return "", False
+
+            tool_meta = tool_info.get("tool_meta", {})
+            if not tool_meta:
+                logger.warning("Could not extract __TOOL_META__ from %s", output_file)
+                os.remove(output_file)
+                return "", False
+            deps = tool_meta.get("dependencies", [])
+            if deps:
+                try:
+                    logger.info("Installing dependencies for tool %s: %s", output_file, deps)
+                    subprocess.run(
+                        ["uv", "pip", "install", "--python", str(ISOLATED_PYTHON_PATH)] + deps, check=True
+                    )
+                except subprocess.CalledProcessError as e:
+                    logger.error("Failed to install dependencies for tool %s: %s", output_file, e)
+                    os.remove(output_file)
+                    return "", False
+        except Exception as e:
+            logger.error("Failed to save code to %s: %s", output_file, e)
+            return "", False
+
+    return generated_code, True
+
 async def call_codex_exec(prompt: str, output_file: str = None) -> tuple[str, bool]:
     """
     Call Codex exec to generate code based on the prompt.
@@ -40,6 +159,10 @@ async def call_codex_exec(prompt: str, output_file: str = None) -> tuple[str, bo
         Tuple of (generated_code, success)
     """
     try:
+        codex_conf = _load_codex_config()
+        if isinstance(codex_conf, dict) and codex_conf.get("model"):
+            return await _call_codex_via_api(prompt, output_file, codex_conf)
+
         # Build codex exec command
         # Use --full-auto to allow file editing and network access
         codex_profile = os.environ.get("CODEX_PROFILE", None)

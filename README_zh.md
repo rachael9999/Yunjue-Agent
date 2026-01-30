@@ -46,7 +46,16 @@
 
 * **Python**: 3.12 或更高版本
 * **包管理器**: [`uv`](https://www.google.com/search?q=%5Bhttps://docs.astral.sh/uv/%5D(https://docs.astral.sh/uv/))
-* **操作系统**: Linux
+* **操作系统**: Linux（推荐）。Windows/macOS 可通过 OpenAI-compatible 后端运行。
+
+### 🔑 模型后端（Qwen / DashScope）
+
+本项目通过 **OpenAI-compatible** 的接口调用模型。若使用 **通义千问 Qwen（DashScope）**，请在 `conf.yaml` 的各个模型块中设置：
+
+* `provider: qwen`
+* `base_url: https://dashscope.aliyuncs.com/compatible-mode/v1`
+* `api_key: <你的 DASHSCOPE_API_KEY>`（也可以不写入 YAML，改为在环境变量里设置 `DASHSCOPE_API_KEY`）
+* `model: qwen-plus` / `qwen-max`（视觉用 `qwen-vl-plus` 等）
 
 ### ⚡ 快速安装
 

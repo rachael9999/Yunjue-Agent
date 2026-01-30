@@ -41,7 +41,18 @@ We welcome connections of all kinds. For financing inquiries, technical exchange
 
 - **Python**: 3.12 or higher
 - **Package Manager**: [`uv`](https://docs.astral.sh/uv/)
-- **Operating System**: Linux
+- **Operating System**: Linux (recommended). Windows/macOS can run via an OpenAI-compatible backend.
+
+### 🔑 LLM Backend (Qwen / DashScope)
+
+This project uses an OpenAI-compatible chat interface. To use **Qwen (Tongyi)** via **DashScope**, set the model blocks in `conf.yaml` to:
+
+- `provider: qwen`
+- `base_url: https://dashscope.aliyuncs.com/compatible-mode/v1`
+- `api_key: <your DASHSCOPE_API_KEY>`
+- `model: qwen-plus` / `qwen-max` (and `qwen-vl-plus` for vision)
+
+You can also export `DASHSCOPE_API_KEY` instead of writing it into YAML.
 
 ### ⚡ Quick Setup
 

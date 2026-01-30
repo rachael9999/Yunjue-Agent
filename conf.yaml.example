@@ -1,7 +1,10 @@
 BASIC_MODEL:
-  base_url: https://xxx
-  model: "gpt-5"
-  api_key: xxxx
+  # Qwen via DashScope (OpenAI-compatible mode)
+  provider: qwen
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen-plus"
+  # Put your DashScope key here, or leave empty and export DASHSCOPE_API_KEY.
+  api_key: ""
   temperature: 0.7
   token_limit: 200000
   # max_retries: 3
@@ -9,9 +12,10 @@ BASIC_MODEL:
 
 
 EVAL_MODEL:
-  base_url: https://xxx
-  model: "gpt-5"
-  api_key: xxxx
+  provider: qwen
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen-plus"
+  api_key: ""
   temperature: 0
   token_limit: 200000
   # max_retries: 3
@@ -20,18 +24,20 @@ EVAL_MODEL:
 
 
 VISION_MODEL:
-  base_url: xxx
-  model: xxx
-  api_key: xxx
+  provider: qwen
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen-vl-plus"
+  api_key: ""
   temperature: 0.7
   token_limit: xxx
   # max_retries: 3
   # timeout: 180
 
 SUMMARIZE_MODEL:
-  base_url: https://xxx
-  model: "gpt-5"
-  api_key: xxxx
+  provider: qwen
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen-plus"
+  api_key: ""
   temperature: 0.2
   token_limit: 200000
   # max_retries: 3 # Maximum number of retries for summary LLM calls
@@ -39,19 +45,31 @@ SUMMARIZE_MODEL:
 
 
 CLUSTER_MODEL:
-  base_url: https://xxx
-  model: "gpt-5"
-  api_key: xxxx
+  provider: qwen
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen-plus"
+  api_key: ""
   temperature: 0.2
   token_limit: 200000
   # max_retries: 3 # Maximum number of retries for summary LLM calls
   # timeout: 180
 
 TOOL_ANALYZE_MODEL:
-  base_url: https://xxx
-  model: "gpt-5"
-  api_key: xxxx
+  provider: qwen
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen-plus"
+  api_key: ""
   temperature: 0.2
   token_limit: 200000
   # max_retries: 3 # Maximum number of retries for summary LLM calls
   # timeout: 180
+
+# Use OpenAI ChatGPT for tool generation (Codex replacement)
+CODEX_MODEL:
+  provider: openai
+  base_url: https://api.openai.com/v1
+  model: "gpt-4o-mini"
+  api_key: "" # or set CODEX_API_KEY / OPENAI_API_KEY
+  temperature: 0.2
+  max_retries: 3
+  timeout: 180
